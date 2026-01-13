@@ -7,11 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"interchange/config"
-	"interchange/internal/core"
-	"interchange/internal/database/fluentd/model"
 	"interchange/internal/database/fluentd/repository"
 	"interchange/internal/pkg/response"
-	"interchange/internal/telemetry"
 	"io"
 	"mime"
 	"strings"
@@ -19,6 +16,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -36,29 +34,33 @@ type MessageItem struct {
 	Role    string        `json:"role"`
 }
 type Logger struct {
-	logger            *zap.Logger
-	trace             *telemetry.Trace
+	logger *zap.Logger
+	// trace             *telemetry.Trace
 	config            *config.Configuration
 	fluentdRepository *repository.LogRepository
 }
 
 func NewLogger(
 	logger *zap.Logger,
-	trace *telemetry.Trace,
+	// trace *telemetry.Trace,
 	config *config.Configuration,
-	fluentdRepository *repository.LogRepository,
+	// fluentdRepository *repository.LogRepository,
 ) *Logger {
 	return &Logger{
-		logger:            logger,
-		trace:             trace,
-		config:            config,
-		fluentdRepository: fluentdRepository,
+		logger: logger,
+		// trace:             trace,
+		config: config,
+		// fluentdRepository: fluentdRepository,
 	}
 }
 
 // LoggerHandler 記錄每個請求的詳細資訊（避免讀取二進位 body；文字 body 做安全截斷與 UTF-8 處理）
 func (m *Logger) LoggerHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		RequestID, err := uuid.NewV7()
+		if err != nil {
+			RequestID = uuid.New()
+		}
 		endpoint := c.FullPath()
 		if strings.HasPrefix(endpoint, "/swagger") ||
 			strings.HasPrefix(endpoint, "/metrics") ||
@@ -68,7 +70,7 @@ func (m *Logger) LoggerHandler() gin.HandlerFunc {
 			return
 		}
 
-		ctx, span, end := m.trace.WithSpan(c.Request.Context(), string(core.SpanLoggerMiddleware))
+		// ctx, span, end := m.trace.WithSpan(c.Request.Context(), string(core.SpanLoggerMiddleware))
 
 		// ===== 判斷 content-type，二進位不讀 body =====
 		ct := c.GetHeader("Content-Type")
@@ -108,8 +110,8 @@ func (m *Logger) LoggerHandler() gin.HandlerFunc {
 		method := c.Request.Method
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
-		traceID := span.SpanContext().TraceID()
-		spanID := span.SpanContext().SpanID()
+		// traceID := span.SpanContext().TraceID()
+		// spanID := span.SpanContext().SpanID()
 
 		if strings.HasPrefix(mediaType, "application/json") || bodyJSON != nil {
 			// 先序列化成 bytes，供 Cline / Roo 判斷
@@ -148,23 +150,24 @@ func (m *Logger) LoggerHandler() gin.HandlerFunc {
 		}
 
 		// Trace Meta（Body 使用 effectiveBody）
-		meta := core.LoggerRequestMeta{
-			Method:     method,
-			Path:       path,
-			FullPath:   endpoint,
-			Query:      query,
-			Body:       bodyRaw,
-			Scheme:     c.Request.URL.Scheme,
-			Host:       c.Request.Host,
-			UserAgent:  c.Request.UserAgent(),
-			ContentLen: c.Request.ContentLength,
-			Proto:      c.Request.Proto,
-			ClientIP:   c.ClientIP(),
-			Headers:    headerMap,
-			Params:     paramsMap,
-		}
-		m.trace.ApplyTraceAttributes(span, meta)
-
+		/*
+			meta := core.LoggerRequestMeta{
+				Method:     method,
+				Path:       path,
+				FullPath:   endpoint,
+				Query:      query,
+				Body:       bodyRaw,
+				Scheme:     c.Request.URL.Scheme,
+				Host:       c.Request.Host,
+				UserAgent:  c.Request.UserAgent(),
+				ContentLen: c.Request.ContentLength,
+				Proto:      c.Request.Proto,
+				ClientIP:   c.ClientIP(),
+				Headers:    headerMap,
+				Params:     paramsMap,
+			}
+			m.trace.ApplyTraceAttributes(span, meta)
+		*/
 		logFields := []zap.Field{
 			zap.String("method", method),
 			zap.String("path", path),
@@ -179,25 +182,29 @@ func (m *Logger) LoggerHandler() gin.HandlerFunc {
 		if bodyRaw != "" {
 			logFields = append(logFields, zap.String("body", bodyRaw)) // ← 統一：處理後的 body
 		}
-		logFields = append(logFields, zap.String("spanId", fmt.Sprintf("%x", spanID[:])))
-		logFields = append(logFields, zap.String("traceId", fmt.Sprintf("%x", traceID[:])))
+		// logFields = append(logFields, zap.String("spanId", fmt.Sprintf("%x", spanID[:])))
+		// logFields = append(logFields, zap.String("traceId", fmt.Sprintf("%x", traceID[:])))
+		logFields = append(logFields, zap.String("RequestTS", requestTime.UTC().Format("2006-01-02 15:04:05.999999 UTC")))
+		logFields = append(logFields, zap.String("RequestId", fmt.Sprintf("%x", RequestID.String())))
 
 		m.logger.Info("[Request] logging middleware message", logFields...)
 
 		// Fluentd（Body 使用 effectiveBody）
-		responseMeta := model.RequestLog{
-			RequestID:   fmt.Sprintf("%x", traceID[:]),
-			Method:      method,
-			Path:        path,
-			ProjectName: m.config.App.Name,
-			RequestTS:   requestTime.UTC().Format("2006-01-02 15:04:05.999999 UTC"),
-			Body:        bodyRaw, // ← 統一：處理後的 body
-			IPHash:      base64.RawStdEncoding.EncodeToString([]byte(c.ClientIP())),
-			UserAgent:   c.Request.UserAgent(),
-			Version:     m.config.App.Version,
-		}
-		m.fluentdRepository.LogRequest(ctx, responseMeta)
-		end(nil)
+		/*
+				responseMeta := model.RequestLog{
+					RequestID:   fmt.Sprintf("%x", traceID[:]),
+					Method:      method,
+					Path:        path,
+					ProjectName: m.config.App.Name,
+					RequestTS:   requestTime.UTC().Format("2006-01-02 15:04:05.999999 UTC"),
+					Body:        bodyRaw, // ← 統一：處理後的 body
+					IPHash:      base64.RawStdEncoding.EncodeToString([]byte(c.ClientIP())),
+					UserAgent:   c.Request.UserAgent(),
+					Version:     m.config.App.Version,
+				}
+				m.fluentdRepository.LogRequest(ctx, responseMeta)
+			end(nil)
+		*/
 		c.Next()
 	}
 }

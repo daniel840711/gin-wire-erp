@@ -26,17 +26,13 @@ require (
 )
 
 require (
-	github.com/google/subcommands v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/philhofer/fwd v1.2.0 // indirect
-	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/tinylib/msgp v1.3.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.37.0 // indirect
-	golang.org/x/mod v0.25.0 // indirect
 )
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.53.0
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect

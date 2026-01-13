@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"interchange/internal/core"
-	"interchange/internal/telemetry"
 	"strings"
 
 	"github.com/gin-contrib/cors"
@@ -10,11 +8,11 @@ import (
 )
 
 type Cors struct {
-	trace *telemetry.Trace
+	// trace *telemetry.Trace
 }
 
-func NewCors(trace *telemetry.Trace) *Cors {
-	return &Cors{trace: trace}
+func NewCors() *Cors {
+	return &Cors{}
 }
 
 // CorsHandler 設定 CORS，並以 WithSpan 紀錄設定（跳過特定路徑的 tracing，但仍套用 CORS）
@@ -45,17 +43,18 @@ func (m *Cors) CorsHandler() gin.HandlerFunc {
 			corsHandler(c)
 			return
 		}
+		/*
+			_, span, end := m.trace.WithSpan(c.Request.Context(), string(core.SpanCorsMiddleware))
+			defer end(nil)
 
-		_, span, end := m.trace.WithSpan(c.Request.Context(), string(core.SpanCorsMiddleware))
-		defer end(nil)
-
-		// 記錄 CORS 設定到 trace（以 struct tag）
-		m.trace.ApplyTraceAttributes(span, corsMeta{
-			AllowOrigins: cfg.AllowOrigins,
-			AllowMethods: cfg.AllowMethods,
-			AllowHeaders: cfg.AllowHeaders,
-			AllowCreds:   cfg.AllowCredentials,
-		})
+			// 記錄 CORS 設定到 trace（以 struct tag）
+			m.trace.ApplyTraceAttributes(span, corsMeta{
+				AllowOrigins: cfg.AllowOrigins,
+				AllowMethods: cfg.AllowMethods,
+				AllowHeaders: cfg.AllowHeaders,
+				AllowCreds:   cfg.AllowCredentials,
+			})
+		*/
 
 		// 執行實際的 CORS middleware（其內部會呼叫 c.Next()）
 		corsHandler(c)

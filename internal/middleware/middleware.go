@@ -6,9 +6,9 @@ var ProviderSet = wire.NewSet(
 	NewCors,
 	NewLogger,
 	NewRecovery,
-	NewTraceEntry,
-	NewAPIKey,
-	NewRateLimit,
+	// NewTraceEntry,
+	// NewAPIKey,
+	// NewRateLimit,
 	NewResponse,
-	NewUser,
+	// NewUser,
 )
