@@ -1,0 +1,29 @@
+app:
+  env: "development"        # 對應 APP__ENV
+  port: 3000                # 對應 APP__PORT
+  secret_key: "aW50ZXJjaGFuZ2VjcmV0X2tleQ=="
+  name: "interchange"
+  version: "1.0.0"
+  swagger_enabled: true
+  endpoint_url: "https://uptown-sb.finger.com.tw/interchange/api"
+
+log:
+  level: "info"
+
+redis:
+  host: "192.168.128.208"
+  port: 30010
+  db: 1
+  password: ""
+
+mongodb:
+  uri: "mongodb://192.168.128.208:30000/"
+  options: "authSource=admin&retryWrites=true&w=majority"
+
+telemetry:
+  metric:
+    enabled: true
+    buckets: [0.1, 0.2, 0.5, 1, 2, 5]
+  trace:
+    enabled: true
+    endpoint_url: "http://192.168.128.208:4318"

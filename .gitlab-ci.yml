@@ -1,0 +1,19 @@
+stages:
+  - build
+
+variables:
+  IMAGE_BASE_NAME: "interchange"
+  IMAGE_NAME: "$GCR_HOSTNAME/$GCP_PROJECT_ID/docker-image/$IMAGE_BASE_NAME:$CI_COMMIT_TAG"
+
+build_job:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  script:
+    - echo "$PROD_STORAGE_MANAGER_KEY" | docker login -u _json_key --password-stdin https://$GCR_HOSTNAME
+    - docker build -t $IMAGE_NAME .
+    - docker push $IMAGE_NAME
+    - docker logout https://$GCR_HOSTNAME
+  only:
+    - tags

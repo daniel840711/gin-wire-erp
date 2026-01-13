@@ -1,0 +1,3208 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "這是後端 API 文件",
+        "title": "interchange API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "取得用戶列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "頁碼",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每頁筆數",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色",
+                        "name": "role",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "狀態",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/interchange_internal_dto.UserResponseDto"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "新增用戶",
+                "parameters": [
+                    {
+                        "description": "用戶資訊",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.CreateUserDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UserResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{userID}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "取得單一用戶資訊",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UserResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "更新用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用戶更新資訊",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UpdateUserDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "刪除用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{userID}/api-keys": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-APIKey"
+                ],
+                "summary": "取得用戶的 API Key 列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/interchange_internal_dto.UserAPIKeyResponseDto"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-APIKey"
+                ],
+                "summary": "為指定用戶新增 API Key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "API Key 資訊",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.CreateUserAPIKeyDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UserAPIKeyResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{userID}/api-keys/{apiKeyID}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-APIKey"
+                ],
+                "summary": "取得單一 API Key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key ID",
+                        "name": "apiKeyID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UserAPIKeyResponseDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-APIKey"
+                ],
+                "summary": "全量覆蓋 provider_access 欄位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key ID",
+                        "name": "apiKeyID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "provider_access",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UpdateProviderAccessAllDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-APIKey"
+                ],
+                "summary": "刪除 API Key",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key ID",
+                        "name": "apiKeyID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{userID}/api-keys/{apiKeyID}/provider/{provider}": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-APIKey"
+                ],
+                "summary": "局部更新 provider 欄位",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "API Key ID",
+                        "name": "apiKeyID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "要更新的欄位map",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{userID}/role": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "更新用戶角色",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "角色資訊",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UpdateUserRoleDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/{userID}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin-User"
+                ],
+                "summary": "更新用戶狀態",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "狀態資訊",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_dto.UpdateUserStatusDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/mcp-server/{version}/{provider}/{action}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "將上游請求（method / path / query / headers / body）原樣轉傳到指定 provider 的 API，並把下游的狀態碼、標頭、內容原樣回傳。支援 JSON 與 SSE（text/event-stream）。",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "MCP-Server"
+                ],
+                "summary": "MCP 透明轉傳",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "欲轉傳之相對路徑（萬用字元，例：/chat/completions）",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "下游原始回應（或 SSE 串流）",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "將上游請求（method / path / query / headers / body）原樣轉傳到指定 provider 的 API，並把下游的狀態碼、標頭、內容原樣回傳。支援 JSON 與 SSE（text/event-stream）。",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "MCP-Server"
+                ],
+                "summary": "MCP 透明轉傳",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "欲轉傳之相對路徑（萬用字元，例：/chat/completions）",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "下游原始回應（或 SSE 串流）",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "將上游請求（method / path / query / headers / body）原樣轉傳到指定 provider 的 API，並把下游的狀態碼、標頭、內容原樣回傳。支援 JSON 與 SSE（text/event-stream）。",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "MCP-Server"
+                ],
+                "summary": "MCP 透明轉傳",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "欲轉傳之相對路徑（萬用字元，例：/chat/completions）",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "下游原始回應（或 SSE 串流）",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "將上游請求（method / path / query / headers / body）原樣轉傳到指定 provider 的 API，並把下游的狀態碼、標頭、內容原樣回傳。支援 JSON 與 SSE（text/event-stream）。",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "MCP-Server"
+                ],
+                "summary": "MCP 透明轉傳",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "欲轉傳之相對路徑（萬用字元，例：/chat/completions）",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "下游原始回應（或 SSE 串流）",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "將上游請求（method / path / query / headers / body）原樣轉傳到指定 provider 的 API，並把下游的狀態碼、標頭、內容原樣回傳。支援 JSON 與 SSE（text/event-stream）。",
+                "consumes": [
+                    "*/*"
+                ],
+                "produces": [
+                    "application/json",
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "MCP-Server"
+                ],
+                "summary": "MCP 透明轉傳",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "欲轉傳之相對路徑（萬用字元，例：/chat/completions）",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "下游原始回應（或 SSE 串流）",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/audio/speech": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "將文字透過指定 provider 的語音模型轉為音訊檔，回傳 `audio/*` 位元流。",
+                "consumes": [
+                    "application/json",
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "audio/*",
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "Proxy-Audio"
+                ],
+                "summary": "語音合成（Text-to-Speech）",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "語音合成請求內容",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_audio.AudioSpeechRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "音訊位元流（Content-Type 依實際模型回傳，例如 audio/mpeg、audio/wav）",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/audio/transcriptions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "上傳音訊檔轉為文字（支援常見格式，如 OGG/MP3/WAV 等），回傳文字結果。",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Audio"
+                ],
+                "summary": "語音轉錄（Speech-to-Text）",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai",
+                            "gemini"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "轉錄請求內容（含檔案與參數）",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_audio.AudioTranscriptionRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "轉錄文字內容",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/audio/translations": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "上傳音訊檔並翻譯為指定語言的文字，回傳翻譯結果。",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Audio"
+                ],
+                "summary": "語音翻譯（Speech Translation）",
+                "parameters": [
+                    {
+                        "enum": [
+                            "v1"
+                        ],
+                        "type": "string",
+                        "description": "API 版本",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "openai",
+                            "gemini"
+                        ],
+                        "type": "string",
+                        "description": "提供者",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "翻譯請求內容（含檔案與參數）",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_audio.AudioTranslationRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "翻譯後文字內容",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "429": {
+                        "description": "Too Many Requests",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/chat/completions": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "處理聊天生成請求",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Chat"
+                ],
+                "summary": "聊天生成",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 版本（例如 v1、v2）",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "模型提供者（例如 openai、azure、gemini）",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "聊天生成請求內容",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_chat.ChatPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/interchange_internal_service_chat.ChatResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/embeddings/generations": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "處理嵌入生成請求",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Embedding"
+                ],
+                "summary": "嵌入生成",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 版本（例如 v1、v2）",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "模型提供者（例如 openai、azure、gemini）",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "嵌入生成請求內容",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_embedding.EmbeddingRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/interchange_internal_service_embedding.EmbeddingResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/images/edits": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Image"
+                ],
+                "summary": "處理圖片編輯請求",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 版本（例如 v1、v2）",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "模型提供者（例如 openai、azure、gemini）",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "圖片編輯請求內容",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageEditRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/images/generations": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Image"
+                ],
+                "summary": "處理圖片生成請求",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 版本（例如 v1、v2）",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "模型提供者（例如 openai、azure、gemini）",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "圖片生成請求內容",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/images/variations": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Image"
+                ],
+                "summary": "處理圖片變體請求",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 版本（例如 v1、v2）",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "模型提供者（例如 openai、azure、gemini）",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "圖片變體請求內容",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageVariantRequestBody"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/proxy/{version}/{provider}/models": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "依 provider 代理列出模型清單（回應維持 OpenAI 形狀）",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Proxy-Models"
+                ],
+                "summary": "模型列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 版本（例如 v1、v2）",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "模型提供者（例如 openai、gemini）",
+                        "name": "provider",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/interchange_internal_pkg_response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/interchange_internal_service_models.ListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/interchange_internal_pkg_error.Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "interchange_internal_core.ApiScope": {
+            "type": "string",
+            "enum": [
+                "/chat/completions",
+                "/images/generations",
+                "/images/variations",
+                "/images/edits",
+                "/audio/transcriptions",
+                "/embeddings",
+                "/models",
+                "/mcp-server/*",
+                "*"
+            ],
+            "x-enum-varnames": [
+                "ApiScopeChatCompletions",
+                "ApiScopeImagesGenerations",
+                "ApiScopeImagesVariations",
+                "ApiScopeImagesEdits",
+                "ApiScopeAudioTranscriptions",
+                "ApiScopeEmbeddingsGenerations",
+                "ApiScopeGetModels",
+                "ApiScopeMCPServer",
+                "ApiScopeAll"
+            ]
+        },
+        "interchange_internal_core.LimitPeriod": {
+            "type": "string",
+            "enum": [
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly",
+                "none"
+            ],
+            "x-enum-varnames": [
+                "LimitPeriodDaily",
+                "LimitPeriodWeekly",
+                "LimitPeriodMonthly",
+                "LimitPeriodYearly",
+                "LimitPeriodNone"
+            ]
+        },
+        "interchange_internal_core.ProviderName": {
+            "type": "string",
+            "enum": [
+                "openai",
+                "gemini",
+                "grok",
+                "custom"
+            ],
+            "x-enum-varnames": [
+                "ProviderOpenAI",
+                "ProviderGemini",
+                "ProviderGrok",
+                "ProviderCustom"
+            ]
+        },
+        "interchange_internal_core.Role": {
+            "type": "string",
+            "enum": [
+                "admin",
+                "editor",
+                "user",
+                "readonly",
+                "banned"
+            ],
+            "x-enum-comments": {
+                "RoleAdmin": "管理員：可編輯所有人",
+                "RoleBanned": "被禁用，無法登入或操作",
+                "RoleEditor": "可編輯內容，但不能做高權限操作",
+                "RoleReadOnly": "只能查詢，不能改資料",
+                "RoleUser": "一般使用者"
+            },
+            "x-enum-varnames": [
+                "RoleAdmin",
+                "RoleEditor",
+                "RoleUser",
+                "RoleReadOnly",
+                "RoleBanned"
+            ]
+        },
+        "interchange_internal_core.Status": {
+            "type": "string",
+            "enum": [
+                "active",
+                "blocked",
+                "suspended",
+                "expired",
+                "revoked",
+                "maintenance",
+                "pending",
+                "deleted"
+            ],
+            "x-enum-comments": {
+                "StatusActive": "正常可用",
+                "StatusBlocked": "被封鎖（例如濫用）",
+                "StatusDeleted": "已刪除（軟刪除）",
+                "StatusExpired": "已過期",
+                "StatusMaintenance": "系統維護中（暫時停用）",
+                "StatusPending": "尚未啟用（等待審核/激活）",
+                "StatusRevoked": "被手動撤銷",
+                "StatusSuspended": "暫停（違規調查中）"
+            },
+            "x-enum-varnames": [
+                "StatusActive",
+                "StatusBlocked",
+                "StatusSuspended",
+                "StatusExpired",
+                "StatusRevoked",
+                "StatusMaintenance",
+                "StatusPending",
+                "StatusDeleted"
+            ]
+        },
+        "interchange_internal_dto.CreateUserAPIKeyDto": {
+            "type": "object",
+            "required": [
+                "keyName",
+                "providerAccess"
+            ],
+            "properties": {
+                "keyName": {
+                    "type": "string"
+                },
+                "keyValue": {
+                    "type": "string"
+                },
+                "providerAccess": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_dto.ProviderAccessDto"
+                    }
+                }
+            }
+        },
+        "interchange_internal_dto.CreateUserDto": {
+            "type": "object",
+            "required": [
+                "displayName",
+                "role",
+                "status"
+            ],
+            "properties": {
+                "displayName": {
+                    "description": "顯示名稱",
+                    "type": "string"
+                },
+                "email": {
+                    "description": "信箱可選且格式驗證",
+                    "type": "string"
+                },
+                "externalID": {
+                    "description": "外部平台 ID（如 Google/Lark）",
+                    "type": "string"
+                },
+                "lang": {
+                    "description": "語系（如 zh-TW, en）",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "角色",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_core.Role"
+                        }
+                    ]
+                },
+                "status": {
+                    "description": "狀態",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_core.Status"
+                        }
+                    ]
+                }
+            }
+        },
+        "interchange_internal_dto.ProviderAccessDto": {
+            "type": "object",
+            "required": [
+                "provider",
+                "status"
+            ],
+            "properties": {
+                "apiScopes": {
+                    "description": "可選，API 權限範圍",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_core.ApiScope"
+                    }
+                },
+                "expireTime": {
+                    "description": "API Key 過期時間",
+                    "type": "string"
+                },
+                "lastResetAt": {
+                    "description": "最後重置時間",
+                    "type": "string"
+                },
+                "lastSeen": {
+                    "description": "最後使用時間",
+                    "type": "string"
+                },
+                "limitCount": {
+                    "description": "限制次數",
+                    "type": "integer"
+                },
+                "limitPeriod": {
+                    "description": "daily, weekly, monthly...",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_core.LimitPeriod"
+                        }
+                    ]
+                },
+                "provider": {
+                    "description": "openai, gemini...",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_core.ProviderName"
+                        }
+                    ]
+                },
+                "providerKey": {
+                    "description": "可選，對應 Provider 的 API Key",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "active, blocked...",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_core.Status"
+                        }
+                    ]
+                },
+                "usedCount": {
+                    "description": "已使用次數",
+                    "type": "integer"
+                }
+            }
+        },
+        "interchange_internal_dto.UpdateProviderAccessAllDto": {
+            "type": "object",
+            "required": [
+                "providerAccess"
+            ],
+            "properties": {
+                "providerAccess": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_dto.ProviderAccessDto"
+                    }
+                }
+            }
+        },
+        "interchange_internal_dto.UpdateUserDto": {
+            "type": "object",
+            "properties": {
+                "displayName": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "externalID": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/interchange_internal_core.Role"
+                },
+                "status": {
+                    "$ref": "#/definitions/interchange_internal_core.Status"
+                }
+            }
+        },
+        "interchange_internal_dto.UpdateUserRoleDto": {
+            "type": "object",
+            "required": [
+                "role"
+            ],
+            "properties": {
+                "role": {
+                    "$ref": "#/definitions/interchange_internal_core.Role"
+                }
+            }
+        },
+        "interchange_internal_dto.UpdateUserStatusDto": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "status": {
+                    "$ref": "#/definitions/interchange_internal_core.Status"
+                }
+            }
+        },
+        "interchange_internal_dto.UserAPIKeyResponseDto": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "keyName": {
+                    "type": "string"
+                },
+                "keyValue": {
+                    "type": "string"
+                },
+                "providerAccess": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_dto.ProviderAccessDto"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_dto.UserResponseDto": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "externalID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lang": {
+                    "type": "string"
+                },
+                "last_seen": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/interchange_internal_core.Role"
+                },
+                "status": {
+                    "$ref": "#/definitions/interchange_internal_core.Status"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_pkg_error.Error": {
+            "type": "object"
+        },
+        "interchange_internal_pkg_response.Response": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "description": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "requestID": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_audio.AudioSpeechRequestBody": {
+            "type": "object",
+            "required": [
+                "input",
+                "model",
+                "voice"
+            ],
+            "properties": {
+                "input": {
+                    "type": "string"
+                },
+                "instructions": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "response_format": {
+                    "description": "mp3, wav, etc.",
+                    "type": "string"
+                },
+                "speed": {
+                    "description": "0.25 - 4.0",
+                    "type": "number"
+                },
+                "stream_format": {
+                    "description": "audio or sse",
+                    "type": "string"
+                },
+                "voice": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_audio.AudioTranscriptionRequestBody": {
+            "type": "object",
+            "required": [
+                "file",
+                "model"
+            ],
+            "properties": {
+                "chunking_strategy": {
+                    "description": "\"auto\" or blank",
+                    "type": "string"
+                },
+                "file": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "include": {
+                    "description": "optional logprobs",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "language": {
+                    "description": "ISO-639-1 e.g. \"en\"",
+                    "type": "string"
+                },
+                "model": {
+                    "description": "whisper-1, gpt-4o-transcribe, etc.",
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "response_format": {
+                    "description": "json, text, srt, etc.",
+                    "type": "string"
+                },
+                "stream": {
+                    "description": "gpt-4o only",
+                    "type": "boolean"
+                },
+                "temperature": {
+                    "type": "number"
+                },
+                "timestamp_granularities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "interchange_internal_service_audio.AudioTranslationRequestBody": {
+            "type": "object",
+            "required": [
+                "file",
+                "model"
+            ],
+            "properties": {
+                "file": {
+                    "description": "使用 multipart/form-data 上傳檔案",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/multipart.FileHeader"
+                        }
+                    ]
+                },
+                "model": {
+                    "description": "ex: whisper-1",
+                    "type": "string"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "response_format": {
+                    "description": "json, text, srt, verbose_json, vtt",
+                    "type": "string"
+                },
+                "temperature": {
+                    "description": "0 ~ 1",
+                    "type": "number"
+                }
+            }
+        },
+        "interchange_internal_service_chat.ChatChoice": {
+            "type": "object",
+            "properties": {
+                "extensions": {
+                    "description": "可再擴充：如 Gemini 會有自家 output/ext，可加 Extensions",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "finish_reason": {
+                    "type": "string"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "logprobs": {},
+                "message": {
+                    "$ref": "#/definitions/interchange_internal_service_chat.ChatResponseMessage"
+                }
+            }
+        },
+        "interchange_internal_service_chat.ChatMessage": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "string (text)、map（image/audio等）、支援多模態"
+                },
+                "extensions": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "function_call": {
+                    "description": "可存 openai function call"
+                },
+                "name": {
+                    "description": "optional",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "\"system\"/\"user\"/\"assistant\"/...",
+                    "type": "string"
+                },
+                "tool_calls": {
+                    "description": "工具調用紀錄"
+                }
+            }
+        },
+        "interchange_internal_service_chat.ChatPayload": {
+            "type": "object",
+            "properties": {
+                "audio": {
+                    "description": "支援 audio output",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "extensions": {
+                    "description": "Custom platform extension:",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "frequency_penalty": {
+                    "type": "number"
+                },
+                "function_call": {
+                    "description": "Deprecated (string or object)"
+                },
+                "functions": {
+                    "description": "Deprecated (array)"
+                },
+                "logit_bias": {
+                    "description": "token id(string): bias",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number"
+                    }
+                },
+                "logprobs": {
+                    "type": "boolean"
+                },
+                "max_completion_tokens": {
+                    "type": "integer"
+                },
+                "messages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_service_chat.ChatMessage"
+                    }
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "modalities": {
+                    "description": "e.g. [\"text\", \"audio\"]",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "model": {
+                    "type": "string"
+                },
+                "n": {
+                    "type": "integer"
+                },
+                "parallel_tool_calls": {
+                    "type": "boolean"
+                },
+                "prediction": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "presence_penalty": {
+                    "type": "number"
+                },
+                "prompt_cache_key": {
+                    "type": "string"
+                },
+                "reasoning_effort": {
+                    "description": "\"low\"/\"medium\"/\"high\"",
+                    "type": "string"
+                },
+                "response_format": {
+                    "description": "e.g. {type:json_schema}",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "safety_identifier": {
+                    "type": "string"
+                },
+                "seed": {
+                    "type": "integer"
+                },
+                "service_tier": {
+                    "description": "\"auto\"/\"default\"/...",
+                    "type": "string"
+                },
+                "stop": {
+                    "description": "string or []string or null"
+                },
+                "store": {
+                    "type": "boolean"
+                },
+                "stream": {
+                    "type": "boolean"
+                },
+                "stream_options": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "temperature": {
+                    "type": "number"
+                },
+                "tool_choice": {
+                    "description": "string or object"
+                },
+                "tools": {
+                    "description": "array (function/tool desc)"
+                },
+                "top_logprobs": {
+                    "type": "integer"
+                },
+                "top_p": {
+                    "type": "number"
+                },
+                "user": {
+                    "description": "Deprecated, for compat",
+                    "type": "string"
+                },
+                "web_search_options": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
+        "interchange_internal_service_chat.ChatResponseMessage": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "array",
+                    "items": {}
+                },
+                "content": {},
+                "extensions": {
+                    "description": "支援未來擴充（如 Gemini 多模態等）",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "refusal": {},
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_chat.ChatResult": {
+            "type": "object",
+            "properties": {
+                "choices": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_service_chat.ChatChoice"
+                    }
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "extensions": {
+                    "description": "供其他平台或自家加欄位",
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "id": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "object": {
+                    "type": "string"
+                },
+                "service_tier": {
+                    "type": "string"
+                },
+                "system_fingerprint": {
+                    "type": "string"
+                },
+                "usage": {
+                    "$ref": "#/definitions/interchange_internal_service_chat.ChatUsage"
+                }
+            }
+        },
+        "interchange_internal_service_chat.ChatUsage": {
+            "type": "object",
+            "properties": {
+                "completion_tokens": {
+                    "type": "integer"
+                },
+                "completion_tokens_details": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "extensions": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "prompt_tokens": {
+                    "type": "integer"
+                },
+                "prompt_tokens_details": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "total_tokens": {
+                    "type": "integer"
+                }
+            }
+        },
+        "interchange_internal_service_embedding.EmbeddingRequestBody": {
+            "type": "object",
+            "properties": {
+                "dimensions": {
+                    "description": "optional",
+                    "type": "integer"
+                },
+                "encoding_format": {
+                    "description": "optional: \"float\" or \"base64\"",
+                    "type": "string"
+                },
+                "input": {
+                    "description": "string or []string or [][]int"
+                },
+                "model": {
+                    "description": "required",
+                    "type": "string"
+                },
+                "user": {
+                    "description": "optional",
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_embedding.EmbeddingResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "embedding": {
+                                "description": "e.g. 1536 floats for ada-002",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                }
+                            },
+                            "index": {
+                                "type": "integer"
+                            },
+                            "object": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "model": {
+                    "type": "string"
+                },
+                "object": {
+                    "type": "string"
+                },
+                "usage": {
+                    "type": "object",
+                    "properties": {
+                        "prompt_tokens": {
+                            "type": "integer"
+                        },
+                        "total_tokens": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageEditRequestBody": {
+            "type": "object",
+            "required": [
+                "image",
+                "model",
+                "prompt"
+            ],
+            "properties": {
+                "background": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/multipart.FileHeader"
+                    }
+                },
+                "mask": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "model": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageModel"
+                },
+                "n": {
+                    "type": "integer"
+                },
+                "output_compression": {
+                    "type": "integer"
+                },
+                "output_format": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageOutputFormat"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "quality": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageQuality"
+                },
+                "response_format": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageResponseFormat"
+                },
+                "size": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageSize"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageGenerationData": {
+            "type": "object",
+            "properties": {
+                "b64_json": {
+                    "description": "base64-encoded image",
+                    "type": "string"
+                },
+                "revised_prompt": {
+                    "description": "dall-e-3 only",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "url for images (dall-e-2, dall-e-3)",
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageGenerationInputTokensDetail": {
+            "type": "object",
+            "properties": {
+                "image_tokens": {
+                    "type": "integer"
+                },
+                "text_tokens": {
+                    "type": "integer"
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageGenerationRequestBody": {
+            "type": "object",
+            "properties": {
+                "model": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageModel"
+                },
+                "n": {
+                    "type": "integer"
+                },
+                "prompt": {
+                    "type": "string"
+                },
+                "quality": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageQuality"
+                },
+                "response_format": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageResponseFormat"
+                },
+                "size": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageSize"
+                },
+                "style": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageStyle"
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageGenerationResponse": {
+            "type": "object",
+            "properties": {
+                "background": {
+                    "description": "\"transparent\" | \"opaque\"",
+                    "type": "string"
+                },
+                "created": {
+                    "description": "unix timestamp (秒)",
+                    "type": "integer"
+                },
+                "data": {
+                    "description": "圖片列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationData"
+                    }
+                },
+                "output_format": {
+                    "description": "\"png\", \"jpeg\", \"webp\"",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageOutputFormat"
+                        }
+                    ]
+                },
+                "quality": {
+                    "description": "\"low\", \"medium\", \"high\"",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageQuality"
+                        }
+                    ]
+                },
+                "size": {
+                    "description": "\"1024x1024\"...",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageSize"
+                        }
+                    ]
+                },
+                "usage": {
+                    "description": "token usage info (GPT-Image-1 only)",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationUsage"
+                        }
+                    ]
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageGenerationUsage": {
+            "type": "object",
+            "properties": {
+                "input_tokens": {
+                    "type": "integer"
+                },
+                "input_tokens_details": {
+                    "$ref": "#/definitions/interchange_internal_service_images.ImageGenerationInputTokensDetail"
+                },
+                "output_tokens": {
+                    "type": "integer"
+                },
+                "total_tokens": {
+                    "type": "integer"
+                }
+            }
+        },
+        "interchange_internal_service_images.ImageModel": {
+            "type": "string",
+            "enum": [
+                "dall-e-2",
+                "dall-e-3",
+                "gpt-image-1"
+            ],
+            "x-enum-varnames": [
+                "ImageModelDallE2",
+                "ImageModelDallE3",
+                "ImageModelGptImage1"
+            ]
+        },
+        "interchange_internal_service_images.ImageOutputFormat": {
+            "type": "string",
+            "enum": [
+                "png",
+                "jpeg",
+                "webp"
+            ],
+            "x-enum-varnames": [
+                "ImageOutputPNG",
+                "ImageOutputJPEG",
+                "ImageOutputWebP"
+            ]
+        },
+        "interchange_internal_service_images.ImageQuality": {
+            "type": "string",
+            "enum": [
+                "auto",
+                "high",
+                "medium",
+                "low",
+                "hd",
+                "standard"
+            ],
+            "x-enum-varnames": [
+                "ImageQualityAuto",
+                "ImageQualityHigh",
+                "ImageQualityMedium",
+                "ImageQualityLow",
+                "ImageQualityHD",
+                "ImageQualityStandard"
+            ]
+        },
+        "interchange_internal_service_images.ImageResponseFormat": {
+            "type": "string",
+            "enum": [
+                "url",
+                "b64_json"
+            ],
+            "x-enum-varnames": [
+                "ImageResponseURL",
+                "ImageResponseB64Json"
+            ]
+        },
+        "interchange_internal_service_images.ImageSize": {
+            "type": "string",
+            "enum": [
+                "256x256",
+                "512x512",
+                "1024x1024",
+                "1536x1024",
+                "1024x1536",
+                "1792x1024",
+                "1024x1792",
+                "auto"
+            ],
+            "x-enum-varnames": [
+                "ImageSize256",
+                "ImageSize512",
+                "ImageSize1024",
+                "ImageSize1536x1024",
+                "ImageSize1024x1536",
+                "ImageSize1792x1024",
+                "ImageSize1024x1792",
+                "ImageSizeAuto"
+            ]
+        },
+        "interchange_internal_service_images.ImageStyle": {
+            "type": "string",
+            "enum": [
+                "vivid",
+                "natural"
+            ],
+            "x-enum-varnames": [
+                "ImageStyleVivid",
+                "ImageStyleNatural"
+            ]
+        },
+        "interchange_internal_service_images.ImageVariantRequestBody": {
+            "type": "object",
+            "required": [
+                "image",
+                "model",
+                "n",
+                "response_format",
+                "size"
+            ],
+            "properties": {
+                "image": {
+                    "$ref": "#/definitions/multipart.FileHeader"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "n": {
+                    "type": "integer"
+                },
+                "response_format": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_models.ListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/interchange_internal_service_models.Model"
+                    }
+                },
+                "object": {
+                    "description": "\"list\"",
+                    "type": "string"
+                }
+            }
+        },
+        "interchange_internal_service_models.Model": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "description": "unix seconds",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "object": {
+                    "description": "\"model\"",
+                    "type": "string"
+                },
+                "owned_by": {
+                    "description": "e.g. \"openai\" / \"organization-owner\"",
+                    "type": "string"
+                }
+            }
+        },
+        "multipart.FileHeader": {
+            "type": "object",
+            "properties": {
+                "filename": {
+                    "type": "string"
+                },
+                "header": {
+                    "$ref": "#/definitions/textproto.MIMEHeader"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "textproto.MIMEHeader": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
+        },
+        "BearerAuth": {
+            "description": "請在欄位輸入 \"Bearer {token}\"",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

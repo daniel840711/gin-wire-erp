@@ -1,0 +1,5 @@
+conf/.gitignore
+bin/*
+storage/logs/*.log
+cmd/storage/logs/*.log
+cmd/app/*.exe
