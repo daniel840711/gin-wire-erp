@@ -37,8 +37,21 @@ const (
 
 // MongoDB collections
 const (
-	MongoCollectionUsers       MongoCollection = "interchange_users"
-	MongoCollectionUserAPIKeys MongoCollection = "interchange_user_api_keys"
+	MongoCollectionUsers                           MongoCollection = "interchange_users"
+	MongoCollectionUserAPIKeys                     MongoCollection = "interchange_user_api_keys"
+	MongoCollectionTenants                         MongoCollection = "tenants"
+	MongoCollectionOrganizationNodes               MongoCollection = "organization_nodes"
+	MongoCollectionStores                          MongoCollection = "stores"
+	MongoCollectionEmployees                       MongoCollection = "employees"
+	MongoCollectionEmployeeOrganizationMemberships MongoCollection = "employee_organization_memberships"
+	MongoCollectionEmployeeStoreMemberships        MongoCollection = "employee_store_memberships"
+	MongoCollectionPermissions                     MongoCollection = "permissions"
+	MongoCollectionRoles                           MongoCollection = "roles"
+	MongoCollectionRolePermissions                 MongoCollection = "role_permissions"
+	MongoCollectionRoleAssignments                 MongoCollection = "role_assignments"
+	MongoCollectionPermissionPolicies              MongoCollection = "permission_policies"
+	MongoCollectionPolicyRules                     MongoCollection = "policy_rules"
+	MongoCollectionAssignmentPolicies              MongoCollection = "assignment_policies"
 )
 
 // ─── Redis Keys ────────────────────────────────────────────────────────────────

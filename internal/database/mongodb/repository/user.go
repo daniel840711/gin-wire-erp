@@ -8,23 +8,19 @@ import (
 	"interchange/internal/core"
 	client "interchange/internal/database/client"
 	"interchange/internal/database/mongodb/model"
-	"interchange/internal/telemetry"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 type UserRepository struct {
-	trace      *telemetry.Trace
 	collection *mongo.Collection
 }
 
-func NewUserRepository(trace *telemetry.Trace, mongoClient *client.MongoClient) *UserRepository {
+func NewUserRepository(mongoClient *client.MongoClient) *UserRepository {
 	repository := &UserRepository{
-		trace:      trace,
 		collection: mongoClient.Client().Database(string(core.MongoDBInterchange)).Collection(string(core.MongoCollectionUsers)),
 	}
 	// 建議：啟動時建立常用索引（冪等、存在即跳過）
@@ -34,8 +30,7 @@ func NewUserRepository(trace *telemetry.Trace, mongoClient *client.MongoClient) 
 
 // 依實際查詢習慣調整索引；這裡先提供最通用的兩個
 func (repository *UserRepository) ensureIndexes(contextValue context.Context) error {
-	ctx, _, endSpan := repository.trace.WithSpan(contextValue)
-	defer endSpan(nil)
+	ctx := contextValue
 
 	indexModels := []mongo.IndexModel{
 		{ // 依建立時間倒序查列表
@@ -56,9 +51,6 @@ func (repository *UserRepository) Create(
 	contextValue context.Context,
 	user *model.User,
 ) (_ *model.User, returnedError error) {
-
-	contextValue, _, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
 
 	nowUTC := time.Now().UTC()
 	// 若上游未指定 _id，可自己先產生；InsertOne 會沿用
@@ -86,11 +78,6 @@ func (repository *UserRepository) GetByID(
 	userIdentifier primitive.ObjectID,
 ) (_ *model.User, returnedError error) {
 
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
-
 	var user model.User
 	if returnedError = repository.collection.FindOne(contextValue, bson.M{"_id": userIdentifier}).Decode(&user); returnedError != nil {
 		return nil, returnedError
@@ -104,11 +91,6 @@ func (repository *UserRepository) UpdateStatus(
 	userIdentifier primitive.ObjectID,
 	status core.Status,
 ) (_ int64, returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
 
 	update := bson.M{"$set": bson.M{"status": status}}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": userIdentifier}, withUpdatedAt(update))
@@ -125,11 +107,6 @@ func (repository *UserRepository) UpdateRole(
 	role core.Role,
 ) (_ int64, returnedError error) {
 
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
-
 	update := bson.M{"$set": bson.M{"role": role}}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": userIdentifier}, withUpdatedAt(update))
 	if updateError != nil {
@@ -144,11 +121,6 @@ func (repository *UserRepository) UpdateLastSeen(
 	userIdentifier primitive.ObjectID,
 	lastSeenTime time.Time,
 ) (_ int64, returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
 
 	update := bson.M{"$set": bson.M{"lastSeen": lastSeenTime.UTC()}}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": userIdentifier}, withUpdatedAt(update))
@@ -165,11 +137,6 @@ func (repository *UserRepository) UpdateByID(
 	setFields bson.M,
 ) (_ int64, returnedError error) {
 
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
-
 	update := bson.M{"$set": setFields}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": userIdentifier}, withUpdatedAt(update))
 	if updateError != nil {
@@ -183,11 +150,6 @@ func (repository *UserRepository) DeleteByID(
 	contextValue context.Context,
 	userIdentifier primitive.ObjectID,
 ) (returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
 	_, returnedError = repository.collection.DeleteOne(contextValue, bson.M{"_id": userIdentifier})
 	return returnedError
 }
@@ -197,16 +159,6 @@ func (repository *UserRepository) List(
 	contextValue context.Context,
 	listOptions core.ListOptions,
 ) (_ []*model.User, returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() {
-		repository.trace.ApplyTraceAttributes(span, map[string]any{
-			"filter": listOptions.Filter,
-			"page":   listOptions.Page,
-			"size":   listOptions.Size,
-		})
-		endSpan(returnedError)
-	}()
 
 	findOptions := options.Find().
 		SetSkip(int64(listOptions.Page) * int64(listOptions.Size)).
@@ -231,9 +183,6 @@ func (repository *UserRepository) List(
 func (repository *UserRepository) ListAll(
 	contextValue context.Context,
 ) (_ []*model.User, returnedError error) {
-
-	contextValue, _, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
 
 	cursor, findError := repository.collection.Find(contextValue, bson.M{})
 	if findError != nil {

@@ -8,18 +8,16 @@ import (
 
 	"interchange/internal/core"
 	client "interchange/internal/database/client"
-	"interchange/internal/telemetry"
 
 	"github.com/redis/go-redis/v9"
 )
 
 type RateLimiterRepository struct {
-	trace  *telemetry.Trace
 	client *redis.Client
 }
 
-func NewRateLimiterRepository(trace *telemetry.Trace, client *client.RedisClient) *RateLimiterRepository {
-	return &RateLimiterRepository{trace: trace, client: client.Client()}
+func NewRateLimiterRepository(client *client.RedisClient) *RateLimiterRepository {
+	return &RateLimiterRepository{client: client.Client()}
 }
 
 var ErrRateLimitExceeded = errors.New("rate limit exceeded")
@@ -34,21 +32,6 @@ func (repository *RateLimiterRepository) Consume(
 	windowSeconds int64,
 	limitCount int,
 ) (remainingCount int, timeToLiveSeconds int64, returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() {
-		endSpan(returnedError)
-	}()
-
-	traceMetadata := core.TraceRateLimitMeta{
-		APIKeyID:  apiKeyID,
-		Provider:  string(provider),
-		Period:    string(period),
-		Limit:     limitCount,
-		WindowSec: windowSeconds,
-		Op:        "consume",
-	}
-	repository.trace.ApplyTraceAttributes(span, traceMetadata)
 
 	redisKey := repository.buildKey(apiKeyID, provider, period)
 	expirationDuration := time.Duration(windowSeconds) * time.Second
@@ -72,8 +55,6 @@ func (repository *RateLimiterRepository) Consume(
 			returnedError = ErrRateLimitExceeded
 		}
 		timeToLiveSeconds = windowSeconds
-		traceMetadata.Remaining, traceMetadata.TTL = remainingCount, timeToLiveSeconds
-		repository.trace.ApplyTraceAttributes(span, traceMetadata)
 		return remainingCount, timeToLiveSeconds, returnedError
 	}
 
@@ -92,15 +73,11 @@ func (repository *RateLimiterRepository) Consume(
 
 	if newValue < 0 {
 		remainingCount = 0
-		traceMetadata.Remaining, traceMetadata.TTL = remainingCount, timeToLiveSeconds
-		repository.trace.ApplyTraceAttributes(span, traceMetadata)
 		returnedError = ErrRateLimitExceeded
 		return remainingCount, timeToLiveSeconds, returnedError
 	}
 
 	remainingCount = int(newValue)
-	traceMetadata.Remaining, traceMetadata.TTL = remainingCount, timeToLiveSeconds
-	repository.trace.ApplyTraceAttributes(span, traceMetadata)
 	return remainingCount, timeToLiveSeconds, nil
 }
 
@@ -112,17 +89,6 @@ func (repository *RateLimiterRepository) GetCurrent(
 	period core.LimitPeriod,
 	limitCount int, // ★ 新增這個參數，才能在 key 不存在時回正確的 remaining
 ) (remainingCount int, timeToLiveSeconds int64, returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	traceMetadata := core.TraceRateLimitMeta{
-		APIKeyID: apiKeyIdentifier,
-		Provider: string(provider),
-		Period:   string(period),
-		Op:       "get",
-	}
-	repository.trace.ApplyTraceAttributes(span, traceMetadata)
 
 	redisKey := repository.buildKey(apiKeyIdentifier, provider, period)
 
@@ -140,8 +106,6 @@ func (repository *RateLimiterRepository) GetCurrent(
 		// 尚未初始化：remaining = limitCount, ttl = 0
 		remainingCount = limitCount
 		timeToLiveSeconds = 0
-		traceMetadata.Remaining, traceMetadata.TTL = remainingCount, timeToLiveSeconds
-		repository.trace.ApplyTraceAttributes(span, traceMetadata)
 		return remainingCount, timeToLiveSeconds, nil
 	}
 	if getError != nil {
@@ -161,8 +125,6 @@ func (repository *RateLimiterRepository) GetCurrent(
 		remainingCount = 0
 	}
 
-	traceMetadata.Remaining, traceMetadata.TTL = remainingCount, timeToLiveSeconds
-	repository.trace.ApplyTraceAttributes(span, traceMetadata)
 	return remainingCount, timeToLiveSeconds, nil
 }
 
@@ -177,9 +139,6 @@ func (repository *RateLimiterRepository) Reset(
 	limitCount *int,
 ) (returnedError error) {
 
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
 	valueToSet := 0
 	if limitCount != nil {
 		valueToSet = *limitCount
@@ -187,17 +146,6 @@ func (repository *RateLimiterRepository) Reset(
 			valueToSet = 0
 		}
 	}
-
-	traceMetadata := core.TraceRateLimitMeta{
-		APIKeyID:  apiKeyIdentifier,
-		Provider:  string(provider),
-		Period:    string(period),
-		Limit:     valueToSet,
-		WindowSec: windowSeconds,
-		Remaining: valueToSet,
-		Op:        "reset",
-	}
-	repository.trace.ApplyTraceAttributes(span, traceMetadata)
 
 	redisKey := repository.buildKey(apiKeyIdentifier, provider, period)
 	expiration := time.Duration(windowSeconds) * time.Second
@@ -213,17 +161,6 @@ func (repository *RateLimiterRepository) Delete(
 	provider core.ProviderName,
 	period core.LimitPeriod,
 ) (returnedError error) {
-
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	traceMetadata := core.TraceRateLimitMeta{
-		APIKeyID: apiKeyIdentifier,
-		Provider: string(provider),
-		Period:   string(period),
-		Op:       "delete",
-	}
-	repository.trace.ApplyTraceAttributes(span, traceMetadata)
 
 	redisKey := repository.buildKey(apiKeyIdentifier, provider, period)
 	returnedError = repository.client.Del(contextValue, redisKey).Err()

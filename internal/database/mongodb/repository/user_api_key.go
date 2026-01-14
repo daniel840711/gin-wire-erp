@@ -9,23 +9,19 @@ import (
 	"interchange/internal/core"
 	client "interchange/internal/database/client"
 	"interchange/internal/database/mongodb/model"
-	"interchange/internal/telemetry"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.opentelemetry.io/otel/attribute"
 )
 
 type UserAPIKeyRepository struct {
-	trace      *telemetry.Trace
 	collection *mongo.Collection
 }
 
-func NewUserAPIKeyRepository(trace *telemetry.Trace, mongoClient *client.MongoClient) *UserAPIKeyRepository {
+func NewUserAPIKeyRepository(mongoClient *client.MongoClient) *UserAPIKeyRepository {
 	repository := &UserAPIKeyRepository{
-		trace:      trace,
 		collection: mongoClient.Client().Database(string(core.MongoDBInterchange)).Collection(string(core.MongoCollectionUserAPIKeys)),
 	}
 	_ = repository.ensureIndexes(context.Background())
@@ -36,8 +32,7 @@ func NewUserAPIKeyRepository(trace *telemetry.Trace, mongoClient *client.MongoCl
 // 1) userID+keyName 唯一（避免同用戶同名重覆建立）
 // 2) 常用查詢加速：userID、createdAt、providerAccess.provider
 func (repository *UserAPIKeyRepository) ensureIndexes(contextValue context.Context) error {
-	ctx, _, endSpan := repository.trace.WithSpan(contextValue)
-	defer endSpan(nil)
+	ctx := contextValue
 
 	models := []mongo.IndexModel{
 		{
@@ -72,9 +67,6 @@ func (repository *UserAPIKeyRepository) ensureIndexes(contextValue context.Conte
 
 // Create 新增一筆 API Key
 func (repository *UserAPIKeyRepository) Create(contextValue context.Context, apiKey *model.UserAPIKey) (_ *model.UserAPIKey, returnedError error) {
-	contextValue, _, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
 	nowUTC := time.Now().UTC()
 	apiKey.CreatedAt = nowUTC
 	apiKey.UpdatedAt = nowUTC
@@ -93,9 +85,6 @@ func (repository *UserAPIKeyRepository) Create(contextValue context.Context, api
 
 // List 依條件查詢 API Key
 func (repository *UserAPIKeyRepository) List(contextValue context.Context, filter bson.M) (_ []*model.UserAPIKey, returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
 	cursor, findError := repository.collection.Find(contextValue, filter)
 	if findError != nil {
 		return nil, findError
@@ -114,20 +103,11 @@ func (repository *UserAPIKeyRepository) List(contextValue context.Context, filte
 		return nil, cursorError
 	}
 
-	repository.trace.ApplyTraceAttributes(span, map[string]any{
-		"filter": filter,
-		"count":  len(results),
-	})
 	return results, nil
 }
 
 // GetByID 依 ID 取得單一 API Key
 func (repository *UserAPIKeyRepository) GetByID(contextValue context.Context, apiKeyIdentifier primitive.ObjectID) (_ *model.UserAPIKey, returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("api_key.id", apiKeyIdentifier.Hex()))
-
 	var apiKey model.UserAPIKey
 	if returnedError = repository.collection.FindOne(contextValue, bson.M{"_id": apiKeyIdentifier}).Decode(&apiKey); returnedError != nil {
 		return nil, returnedError
@@ -137,11 +117,6 @@ func (repository *UserAPIKeyRepository) GetByID(contextValue context.Context, ap
 
 // ListByUserID 取得使用者底下的 API Key
 func (repository *UserAPIKeyRepository) ListByUserID(contextValue context.Context, userIdentifier primitive.ObjectID) (_ []*model.UserAPIKey, returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
-
 	cursor, findError := repository.collection.Find(contextValue, bson.M{"userID": userIdentifier})
 	if findError != nil {
 		return nil, findError
@@ -164,32 +139,18 @@ func (repository *UserAPIKeyRepository) ListByUserID(contextValue context.Contex
 
 // DeleteByID 依 ID 刪除
 func (repository *UserAPIKeyRepository) DeleteByID(contextValue context.Context, apiKeyIdentifier primitive.ObjectID) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("api_key.id", apiKeyIdentifier.Hex()))
-
 	_, returnedError = repository.collection.DeleteOne(contextValue, bson.M{"_id": apiKeyIdentifier})
 	return returnedError
 }
 
 // DeleteAllByUserID 刪除使用者底下所有 API Key
 func (repository *UserAPIKeyRepository) DeleteAllByUserID(contextValue context.Context, userIdentifier primitive.ObjectID) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("user.id", userIdentifier.Hex()))
 	_, returnedError = repository.collection.DeleteMany(contextValue, bson.M{"userID": userIdentifier})
 	return returnedError
 }
 
 // UpdateKeyName 更新 KeyName
 func (repository *UserAPIKeyRepository) UpdateKeyName(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, keyName string) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("api_key.id", apiKeyIdentifier.Hex()))
-
 	update := bson.M{"$set": bson.M{"keyName": keyName}}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": apiKeyIdentifier}, withUpdatedAt(update))
 	if updateError != nil {
@@ -203,11 +164,6 @@ func (repository *UserAPIKeyRepository) UpdateKeyName(contextValue context.Conte
 
 // UpdateKeyValue 更新 KeyValue
 func (repository *UserAPIKeyRepository) UpdateKeyValue(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, keyValue string) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("api_key.id", apiKeyIdentifier.Hex()))
-
 	update := bson.M{"$set": bson.M{"keyValue": keyValue}}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": apiKeyIdentifier}, withUpdatedAt(update))
 	if updateError != nil {
@@ -221,11 +177,6 @@ func (repository *UserAPIKeyRepository) UpdateKeyValue(contextValue context.Cont
 
 // UpdateProviderAccessAll 全量覆蓋 providerAccess
 func (repository *UserAPIKeyRepository) UpdateProviderAccessAll(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, accessList []model.ProviderAccess) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("api_key.id", apiKeyIdentifier.Hex()))
-
 	update := bson.M{"$set": bson.M{"providerAccess": accessList}}
 	result, updateError := repository.collection.UpdateOne(contextValue, bson.M{"_id": apiKeyIdentifier}, withUpdatedAt(update))
 	if updateError != nil {
@@ -239,14 +190,6 @@ func (repository *UserAPIKeyRepository) UpdateProviderAccessAll(contextValue con
 
 // UpdateProviderStatus 更新單一 provider 的狀態
 func (repository *UserAPIKeyRepository) UpdateProviderStatus(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, providerName core.ProviderName, status string) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-	)
-
 	filter := bson.M{
 		"_id":                     apiKeyIdentifier,
 		"providerAccess.provider": providerName,
@@ -273,14 +216,6 @@ func (repository *UserAPIKeyRepository) UpdateProviderStatus(contextValue contex
 
 // UpdateProviderLimitCount 更新限額（arrayFilters 版）
 func (repository *UserAPIKeyRepository) UpdateProviderLimitCount(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, providerName core.ProviderName, limitCount int) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-	)
-
 	filter := bson.M{
 		"_id":                     apiKeyIdentifier,
 		"providerAccess.provider": providerName,
@@ -307,14 +242,6 @@ func (repository *UserAPIKeyRepository) UpdateProviderLimitCount(contextValue co
 
 // UpdateProviderUsedCount 覆寫已用次數（arrayFilters 版）
 func (repository *UserAPIKeyRepository) UpdateProviderUsedCount(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, providerName core.ProviderName, usedCount int) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-	)
-
 	filter := bson.M{
 		"_id":                     apiKeyIdentifier,
 		"providerAccess.provider": providerName,
@@ -341,11 +268,6 @@ func (repository *UserAPIKeyRepository) UpdateProviderUsedCount(contextValue con
 
 // UpdateExpireTime 更新 API Key 的到期時間
 func (repository *UserAPIKeyRepository) UpdateExpireTime(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, expireTime time.Time) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(attribute.String("api_key.id", apiKeyIdentifier.Hex()))
-
 	filter := bson.M{"_id": apiKeyIdentifier}
 	update := bson.M{"$set": bson.M{"expireTime": expireTime.UTC()}}
 
@@ -366,15 +288,6 @@ func (repository *UserAPIKeyRepository) IncrProviderUsedCount(
 	providerName core.ProviderName,
 	increment int,
 ) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-		attribute.Int("increment", increment),
-	)
-
 	if increment == 0 {
 		return nil
 	}
@@ -408,14 +321,6 @@ func (repository *UserAPIKeyRepository) IncrProviderUsedCount(
 
 // UpdateProviderLastResetAt
 func (repository *UserAPIKeyRepository) UpdateProviderLastResetAt(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, providerName core.ProviderName, resetTime time.Time) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-	)
-
 	filter := bson.M{
 		"_id":                     apiKeyIdentifier,
 		"providerAccess.provider": providerName,
@@ -447,14 +352,6 @@ func (repository *UserAPIKeyRepository) UpdateLastSeen(
 	providerName core.ProviderName,
 	lastSeenTime time.Time,
 ) (_ int64, returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-	)
-
 	filter := bson.M{
 		"_id":                     apiKeyIdentifier,
 		"providerAccess.provider": providerName,
@@ -478,14 +375,6 @@ func (repository *UserAPIKeyRepository) UpdateLastSeen(
 
 // UpdateProviderFields 通用局部更新
 func (repository *UserAPIKeyRepository) UpdateProviderFields(contextValue context.Context, apiKeyIdentifier primitive.ObjectID, providerName core.ProviderName, fields map[string]interface{}) (returnedError error) {
-	contextValue, span, endSpan := repository.trace.WithSpan(contextValue)
-	defer func() { endSpan(returnedError) }()
-
-	span.SetAttributes(
-		attribute.String("api_key.id", apiKeyIdentifier.Hex()),
-		attribute.String("provider", string(providerName)),
-	)
-
 	if len(fields) == 0 {
 		return nil
 	}
