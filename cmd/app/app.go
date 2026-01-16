@@ -4,6 +4,7 @@ import (
 	"context"
 	"interchange/config"
 	"interchange/internal/cron"
+	"interchange/internal/service"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -23,10 +24,11 @@ type RuntimeInfo struct {
 }
 
 type App struct {
-	conf    *config.Configuration
-	logger  *zap.Logger
-	httpSrv *http.Server
-	cronSrv *cron.Cron
+	conf          *config.Configuration
+	logger        *zap.Logger
+	cronSrv       *cron.Cron
+	Router        *gin.Engine
+	healthService *service.HealthService
 
 	startAt time.Time   // 程式啟動時間（非環境變數）
 	appInfo RuntimeInfo // 版本/環境快照（來源 = conf.App）
@@ -49,16 +51,18 @@ func newHttpClient() *http.Client {
 func newApp(
 	conf *config.Configuration,
 	logger *zap.Logger,
-	httpSrv *http.Server,
+	router *gin.Engine,
+	healthService *service.HealthService,
 	cronSrv *cron.Cron,
 ) *App {
 	startAt := time.Now()
 	return &App{
-		conf:    conf,
-		logger:  logger,
-		httpSrv: httpSrv,
-		cronSrv: cronSrv,
-		startAt: startAt,
+		conf:          conf,
+		logger:        logger,
+		Router:        router,
+		healthService: healthService,
+		cronSrv:       cronSrv,
+		startAt:       startAt,
 		appInfo: RuntimeInfo{
 			Env:       conf.App.Env,
 			Name:      conf.App.Name,
@@ -81,44 +85,38 @@ func (a *App) Run() error {
 	)
 
 	// 2) 動態掛到現有 gin.Engine：加 X-App-Version 標頭與 /version API
-	if engine, ok := a.httpSrv.Handler.(*gin.Engine); ok {
+	if a.Router != nil {
 		// 全域版本標頭（只用 conf.App.Version）
-		engine.Use(func(c *gin.Context) {
+		a.Router.Use(func(c *gin.Context) {
 			if v := a.conf.App.Version; v != "" {
 				c.Writer.Header().Set("X-App-Version", v)
 			}
 			c.Next()
 		})
 		// /version：回傳 JSON（含 uptime）
-		engine.GET("/version", func(c *gin.Context) {
+		a.Router.GET("/version", func(c *gin.Context) {
 			resp := a.appInfo
 			resp.Uptime = time.Since(a.startAt)
 			c.JSON(http.StatusOK, resp)
 		})
 	}
 
-	// 3) 啟動 http 與 cron
-	go func() {
-		a.logger.Info("http server started")
-		if err := a.httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			panic(err)
-		}
-	}()
-	go func() {
-		a.logger.Info("cron server started")
-		if err := a.cronSrv.Run(); err != nil {
-			panic(err)
-		}
-	}()
+	// 3) 啟動 cron
+	if err := a.cronSrv.Run(); err != nil {
+		return err
+	}
+	a.logger.Info("cron server started")
 
 	return nil
 }
 
-func (a *App) Stop(ctx context.Context) error {
-	if err := a.httpSrv.Shutdown(ctx); err != nil {
-		return err
+func (a *App) Close(ctx context.Context) error {
+	if a.healthService != nil {
+		a.healthService.SetReady(false)
 	}
-	a.logger.Info("http server has been stop")
+	if a.cronSrv == nil {
+		return nil
+	}
 
 	if err := a.cronSrv.Stop(ctx); err != nil {
 		return err
@@ -126,4 +124,8 @@ func (a *App) Stop(ctx context.Context) error {
 	a.logger.Info("cron server has been stop")
 
 	return nil
+}
+
+func (a *App) Stop(ctx context.Context) error {
+	return a.Close(ctx)
 }

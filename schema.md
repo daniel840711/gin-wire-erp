@@ -600,3 +600,184 @@ Service 於角色/指派/role_permissions 變更後重新計算並寫入（或�
 - 補上「稽核/審計」：如 `createdBy`, `updatedBy`, `audit_log`。
 - 統一「枚舉字典」：收斂各 table 的 enum 值與對應定義。
 - 針對查詢慢點建立「查詢指標」與「慢查治理」清單。
+
+## 資料結構關係圖
+
+```mermaid
+erDiagram
+  TENANTS {
+    string id PK
+    string name
+    string status
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  ORGANIZATION_NODES {
+    string id PK
+    string tenantId
+    string name
+    string type
+    string parentId
+    string path
+    int depth
+    string managerEmployeeId
+    string status
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  STORES {
+    string id PK
+    string tenantId
+    string code
+    string name
+    string organizationNodeId
+    string region
+    string status
+    string parentStoreId
+    string path
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  EMPLOYEES {
+    string id PK
+    string tenantId
+    string account
+    string passwordHash
+    string displayName
+    string status
+    string primaryOrganizationNodeId
+    string primaryStoreId
+    string jobTitle
+    string reportToEmployeeId
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  EMPLOYEE_ORG_MEMBERSHIPS {
+    string id PK
+    string tenantId
+    string employeeId
+    string organizationNodeId
+    string roleInOrganization
+    datetime createdAt
+  }
+
+  EMPLOYEE_STORE_MEMBERSHIPS {
+    string id PK
+    string tenantId
+    string employeeId
+    string storeId
+    string position
+    datetime createdAt
+  }
+
+  PERMISSIONS {
+    string id PK
+    string tenantId
+    string key
+    string resource
+    string action
+    string description
+    string status
+  }
+
+  ROLES {
+    string id PK
+    string tenantId
+    string name
+    string code
+    bool isSystem
+    string status
+    datetime createdAt
+    datetime updatedAt
+  }
+
+  ROLE_PERMISSIONS {
+    string id PK
+    string tenantId
+    string roleId
+    string permissionId
+    datetime createdAt
+  }
+
+  ROLE_ASSIGNMENTS {
+    string id PK
+    string tenantId
+    string subjectType
+    string subjectId
+    string roleId
+    string scopeType
+    string scopeId
+    string effect
+    datetime expiresAt
+    string createdBy
+    datetime createdAt
+  }
+
+  PERMISSION_POLICIES {
+    string id PK
+    string tenantId
+    string name
+    string description
+  }
+
+  POLICY_RULES {
+    string id PK
+    string tenantId
+    string policyId
+    string resource
+    string action
+    string ruleType
+    json conditions
+  }
+
+  ASSIGNMENT_POLICIES {
+    string id PK
+    string tenantId
+    string roleAssignmentId
+    string policyId
+  }
+
+  TENANTS ||--o{ ORGANIZATION_NODES : has
+  TENANTS ||--o{ STORES : has
+  TENANTS ||--o{ EMPLOYEES : has
+  TENANTS ||--o{ ROLES : has
+  TENANTS ||--o{ PERMISSIONS : "custom (tenantId nullable)"
+  TENANTS ||--o{ ROLE_ASSIGNMENTS : assigns
+  TENANTS ||--o{ PERMISSION_POLICIES : has
+  TENANTS ||--o{ POLICY_RULES : has
+  TENANTS ||--o{ ASSIGNMENT_POLICIES : has
+  TENANTS ||--o{ ROLE_PERMISSIONS : has
+  TENANTS ||--o{ EMPLOYEE_ORG_MEMBERSHIPS : has
+  TENANTS ||--o{ EMPLOYEE_STORE_MEMBERSHIPS : has
+
+  ORGANIZATION_NODES ||--o{ ORGANIZATION_NODES : parent
+  ORGANIZATION_NODES ||--o{ STORES : owns
+  ORGANIZATION_NODES ||--o{ EMPLOYEES : primary
+  ORGANIZATION_NODES ||--o{ EMPLOYEE_ORG_MEMBERSHIPS : has
+  EMPLOYEES ||--o{ ORGANIZATION_NODES : manages
+
+  STORES ||--o{ STORES : parent
+  STORES ||--o{ EMPLOYEE_STORE_MEMBERSHIPS : has
+  STORES ||--o{ EMPLOYEES : "primary optional"
+
+  EMPLOYEES ||--o{ EMPLOYEE_ORG_MEMBERSHIPS : member
+  EMPLOYEES ||--o{ EMPLOYEE_STORE_MEMBERSHIPS : works_at
+  EMPLOYEES ||--o{ EMPLOYEES : reports_to
+  EMPLOYEES ||--o{ ROLE_ASSIGNMENTS : subject(employee)
+
+  ROLES ||--o{ ROLE_PERMISSIONS : grants
+  PERMISSIONS ||--o{ ROLE_PERMISSIONS : uses
+  ROLES ||--o{ ROLE_ASSIGNMENTS : assigned
+
+  ROLE_ASSIGNMENTS ||--o{ ASSIGNMENT_POLICIES : has
+  PERMISSION_POLICIES ||--o{ POLICY_RULES : contains
+  PERMISSION_POLICIES ||--o{ ASSIGNMENT_POLICIES : applied
+
+  ROLE_ASSIGNMENTS }o--|| TENANTS : scope(tenant)
+  ROLE_ASSIGNMENTS }o--|| ORGANIZATION_NODES : scope(org)
+  ROLE_ASSIGNMENTS }o--|| STORES : scope(store)
+```

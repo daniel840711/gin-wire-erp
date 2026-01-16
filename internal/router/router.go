@@ -16,6 +16,7 @@ import (
 
 var ProviderSet = wire.NewSet(
 	NewRouter,
+	NewHealthRouter,
 	// NewAdminRouter,
 	// NewAdminUserAPIKeyRouter,
 	// NewProxyRouter,
@@ -30,6 +31,7 @@ func NewRouter(
 	cors *middleware.Cors,
 	logger *middleware.Logger,
 	responseMiddleware *middleware.Response,
+	healthRouter *HealthRouter,
 	// adminRouter *AdminRouter,
 	// proxyRouter *ProxyRouter,
 	// mcpRouter *MCPRouter,
@@ -72,6 +74,7 @@ func NewRouter(
 		}, ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 	// 註冊 AI Proxy 入口路由
+	healthRouter.RegisterHealthRoutes(router)
 	// proxyRouter.RegisterRoutes(router)
 	// mcpRouter.RegisterRoutes(router)
 	// adminRouter.RegisterRoutes(router)

@@ -21,6 +21,7 @@ var ProviderSet = wire.NewSet(
 	embedding.NewOpenAIService,
 	models.NewOpenAIService,
 	NewProxyService,
+	NewHealthService,
 	ProvideRegistryWithServices,
 )
 

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -83,18 +84,41 @@ func main() {
 			if err := app.Run(); err != nil {
 				panic(err)
 			}
+			// 啟動完成 -> readiness true
+			if app.healthService != nil {
+				app.healthService.SetReady(true)
+			}
 
+			httpServer := newHttpServer(conf, app.Router)
+			go func() {
+				logger.Info("http server started", zap.String("addr", httpServer.Addr))
+				if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+					logger.Fatal("http server failed", zap.Error(err))
+				}
+			}()
+
+			// ====== Graceful Shutdown ======
 			quit := make(chan os.Signal, 1)
 			signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 			<-quit
 
-			logger.Info("shutdown app ...")
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
+			logger.Info("shutdown signal received")
+			// 1. 停止對外服務
+			if app.healthService != nil {
+				app.healthService.SetReady(false)
+			}
 
-			if err := app.Stop(ctx); err != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			// 2. 關閉 HTTP
+			if err := httpServer.Shutdown(ctx); err != nil {
+				logger.Error("server shutdown failed", zap.Error(err))
+			}
+			// 3. 關閉其他資源（DB / Redis / MQ）
+			if err := app.Close(ctx); err != nil {
 				panic(err)
 			}
+			logger.Info("server exited gracefully")
 		},
 	}
 

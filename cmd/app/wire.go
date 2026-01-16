@@ -19,12 +19,11 @@ func wireApp(*config.Configuration, *zap.Logger) (*App, func(), error) {
 	panic(
 		wire.Build(
 			// database.ProviderSet,
-			// service.ProviderSet,
-			// handler.ProviderSet,
+			service.ProviderSet,
+			handler.ProviderSet,
 			middleware.ProviderSet,
 			router.ProviderSet,
 			cron.ProviderSet,
-			newHttpServer,
 			// newHttpClient,
 			// telemetry.ProviderSet,
 			newApp,

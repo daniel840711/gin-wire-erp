@@ -12,8 +12,10 @@ import (
 	"interchange/internal/command"
 	command2 "interchange/internal/command/handler"
 	"interchange/internal/cron"
+	"interchange/internal/handler"
 	"interchange/internal/middleware"
 	"interchange/internal/router"
+	"interchange/internal/service"
 )
 
 import (
@@ -24,14 +26,16 @@ import (
 
 // wireApp init application.
 func wireApp(configuration *config.Configuration, zapLogger *zap.Logger) (*App, func(), error) {
+	healthService := service.NewHealthService()
+	healthHandler := handler.NewHealthHandler(healthService)
+	healthRouter := router.NewHealthRouter(healthHandler)
 	recovery := middleware.NewRecovery(zapLogger, configuration)
 	cors := middleware.NewCors()
 	middlewareLogger := middleware.NewLogger(zapLogger, configuration)
 	response := middleware.NewResponse(zapLogger, configuration)
-	engine := router.NewRouter(configuration, recovery, cors, middlewareLogger, response)
-	server := newHttpServer(configuration, engine)
+	engine := router.NewRouter(configuration, recovery, cors, middlewareLogger, response, healthRouter)
 	cronCron := cron.NewCron(zapLogger)
-	app := newApp(configuration, zapLogger, server, cronCron)
+	app := newApp(configuration, zapLogger, engine, healthService, cronCron)
 	return app, func() {
 	}, nil
 }
